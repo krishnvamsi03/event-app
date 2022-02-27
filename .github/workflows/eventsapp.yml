@@ -21,6 +21,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+        PROJECT_PATH: krishnvamsi03/event-app/events
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
