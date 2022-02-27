@@ -41,8 +41,9 @@ def create_event(request):
         response = {"success": True, "errors": "", "message": ""}
         if serializeObj.is_valid(raise_exception=True):
             try:
-                serializeObj.create(request.data)
+                event = serializeObj.create(request.data)
                 response["message"] = "Event created successfully"
+                response["eventid"] = event.event_id
                 return Response(response, status=status.HTTP_201_CREATED)
             except Exception as e:
                 response["success"] = False
@@ -93,6 +94,7 @@ def book_ticket(request):
             try:
                 ticket = serializeObj.create(
                     request.data, request_user=request.user)
+                responseData["ticketid"] = ticket.ticket_id
                 responseData["success"] = True
                 responseData["message"] = "Ticket booked successfully"
                 return Response(responseData, status=status.HTTP_201_CREATED)

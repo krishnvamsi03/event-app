@@ -66,7 +66,6 @@ class EventsSerializer(serializers.ModelSerializer):
         }
 
     def validate_event_date(self, event_date_time):
-        print("inside validate event date time")
         event_start_date_time = utc.localize(
             datetime.strptime(event_date_time, date_format))
         now = utc.localize(datetime.now())
@@ -75,7 +74,6 @@ class EventsSerializer(serializers.ModelSerializer):
                                    status.HTTP_400_BAD_REQUEST)
 
     def validate_booking_date(self, event_booking_start, event_booking_end, event_start_date_time):
-        print("validate booking date")
         event_booking_start, event_booking_end = datetime.strptime(
             event_booking_start, date_format), datetime.strptime(event_booking_end, date_format)
         event_booking_start, event_booking_end = utc.localize(
@@ -87,7 +85,7 @@ class EventsSerializer(serializers.ModelSerializer):
             raise CustomValidation(
                 "Invalid booking start date and end date, start date and end date should be in range of current and event date ", status_code=status.HTTP_400_BAD_REQUEST)
 
-    def validate_auditorium(self, event_date_time, event_duration, auditorium):
+    def validate_auditorium(self, event_date_time, event_duration, auditorium, event=None):
         event_start_date_time = datetime.strptime(
             event_date_time, date_format)
         event_start_date_time = utc.localize(event_start_date_time)
@@ -100,11 +98,11 @@ class EventsSerializer(serializers.ModelSerializer):
             start, end = utc.localize(datetime.combine(booking.event_start_date, booking.event_start_time)), utc.localize(datetime.combine(
                 booking.event_end_date, booking.event_end_time))
             if (event_start_date_time >= start and event_start_date_time < end) or (event_end_date_time > start and event_end_date_time <= end):
-                raise CustomValidation(
-                    "cannot book this auditorium in this slot", status_code=status.HTTP_400_BAD_REQUEST)
+                if event is None or (event != booking.event):
+                    raise CustomValidation(
+                        "cannot book this auditorium in this slot", status_code=status.HTTP_400_BAD_REQUEST)
 
     def book_auditorium(self, event_date_time, event_duration, auditorium):
-        print("inside book auditorium")
         event_end_date = utc.localize(datetime.strptime(
             event_date_time, date_format)) + timedelta(event_duration)
         auditorium.booked_till = event_date_time
@@ -112,7 +110,6 @@ class EventsSerializer(serializers.ModelSerializer):
         return auditorium
 
     def validate_max_capacity(self, auditorium_capacity, max_capacity):
-        print("inside validate max capacity")
         message = ""
         if max_capacity <= 0:
             message = "max capacity cannot be less than and equal to zero"
@@ -160,7 +157,6 @@ class EventsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         auditorium_data = validated_data.get("auditorium", None)
         meta_data = validated_data.get("event_meta", None)
-
         # update of auditorium, expecting new building name and auditorium name when to change venue.
         newAuditorium = None
         if auditorium_data is not None:
@@ -215,7 +211,7 @@ class EventsSerializer(serializers.ModelSerializer):
 
         # validate if auditorium is available for new time
         self.validate_auditorium(validated_data.get(
-            "event_date_time", instance.event_date_time), validated_data.get("event_duration", instance.event_meta.event_duration), aud)
+            "event_date_time", instance.event_date_time), validated_data.get("event_duration", instance.event_meta.event_duration), aud, instance)
 
         # set auditorium for booking
         auditorium = self.book_auditorium(validated_data.get(
@@ -268,13 +264,17 @@ class TicketSerializer(serializers.Serializer):
 
     def create(self, validated_data, request_user):
         event_data = validated_data.pop("events")
+        user = validated_data.pop("user")
         event = None
         if event_data is not None:
+            print(event_data)
             event = Events.objects.filter(
                 event_id=event_data['event_id']).first()
         if event:
             self.validate_curr_availability(event)
+            print(event)
             tick_no = self.generateTicketNo()
+            print(tick_no)
             ticket = Ticket.objects.create(ticket_no=tick_no,
                                            ticket_issue_to=request_user, events=event, **validated_data)
             meta_instance = event.event_meta
