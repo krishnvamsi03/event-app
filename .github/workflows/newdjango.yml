@@ -23,7 +23,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: psycopg2 prerequisites
       working-directory: ./events
-      run: sudo apt-get install libpq-dev
+      run: sudo apt-get install python-pip python-dev libpq-dev postgresql postgresql-contrib
     - name: Install Dependencies
       working-directory: ./events
       run: |
