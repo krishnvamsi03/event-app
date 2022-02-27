@@ -21,6 +21,9 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    - name: psycopg2 prerequisites
+      working-directory: ./events
+      run: sudo apt-get install libpq-dev
     - name: Install Dependencies
       working-directory: ./events
       run: |
