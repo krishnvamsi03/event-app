@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Events, EventsMeta, Place, Ticket, Auditorium
+from .models import Events, EventsMeta, Place, Ticket, Auditorium, Booking
 # Register your models here.
 
 
@@ -26,3 +26,7 @@ class TicketAdmin(admin.ModelAdmin):
 @admin.register(Auditorium)
 class AuditoriumAdmin(admin.ModelAdmin):
     list_display = [f.name for f in Auditorium._meta.fields]
+
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in Booking._meta.fields]

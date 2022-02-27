@@ -91,13 +91,14 @@ def book_ticket(request):
         responseData = {"success": False, "message": "", "errors": ""}
         if serializeObj.is_valid():
             try:
-                serializeObj.create(request.data)
+                ticket = serializeObj.create(
+                    request.data, request_user=request.user)
                 responseData["success"] = True
                 responseData["message"] = "Ticket booked successfully"
                 return Response(responseData, status=status.HTTP_201_CREATED)
             except Exception as e:
                 responseData["message"] = "failed to book ticket"
-                responseData["errors"] = str(e)
+                responseData["errors"] = str(e.status_code)
                 return Response(responseData, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             responseData["message"] = "invalid json object"
@@ -126,3 +127,22 @@ def view_ticket(request, id):
         else:
             responseData["message"] = "Resource not found"
             return Response(responseData, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def view_registered_events(request):
+    if request.method == "GET":
+        responseData = {"content": [], "count": 0}
+        tickets = Ticket.objects.filter(ticket_issue_to=request.user)
+        for ticket in tickets:
+            subData = {
+                "event_name": ticket.events.event_name,
+                "event_summary": ticket.events.event_summary,
+                "event_date_time": ticket.events.event_date_time,
+                "event_price": ticket.events.price
+            }
+            responseData["content"].append(subData)
+            responseData["count"] += 1
+        return Response(responseData, status=status.HTTP_200_OK)

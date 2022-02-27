@@ -77,6 +77,21 @@ class Events(models.Model):
         return self.event_name
 
 
+class Booking(models.Model):
+    event_auditorium = models.ForeignKey(
+        to=Auditorium, on_delete=models.CASCADE, db_column="Event Venue")
+    event = models.ForeignKey(
+        to=Events, on_delete=models.CASCADE, db_column="Event")
+    event_start_date = models.DateField(
+        db_column="Start Date", blank=True, null=True)
+    event_end_date = models.DateField(
+        db_column="End Date", blank=True, null=True)
+    event_start_time = models.TimeField(
+        db_column="Start Time", blank=True, null=True)
+    event_end_time = models.TimeField(
+        db_column="Event End Time", blank=True, null=True)
+
+
 class Ticket(models.Model):
     ticket_id = models.AutoField(verbose_name="Ticket ID", primary_key=True,
                                  unique=True, db_index=True, db_column="Ticket ID", auto_created=True)
