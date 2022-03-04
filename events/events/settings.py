@@ -89,10 +89,10 @@ if 'test' not in sys.argv:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'dcgaii5ohjlddt',
-            'USER': 'lagxiowpmdwzck',
-            'PASSWORD': '51b61097fad152101317aa65e82b6614bfc409e6588ce1ae5ee57c31c741bbca',
-            'HOST': 'ec2-52-70-109-8.compute-1.amazonaws.com',
+            'NAME': '*********',
+            'USER': '********',
+            'PASSWORD': '**********',
+            'HOST': '**********',
             'PORT': '5432',
             'TEST': {
                 'ENGINE': 'django.db.backends.sqlite3'
